@@ -34,4 +34,22 @@ services:
     depends_on:
       - s3
       - aws-cli-make-bucket
+  glue-jupyter:
+    container_name: "glue-jupyter"
+    image: amazon/aws-glue-libs:glue_libs_4.0.0_image_01
+    volumes:
+      - "~/.aws:/home/glue_user/.aws"
+      - "./:/home/glue_user/workspace/jupyter_workspace/"
+    ports:
+      - "4040:4040"
+      - "18080:18080"
+      - "8998:8998"
+      - "8888:8888"
+    command: /home/glue_user/jupyter/jupyter_start.sh
+    depends_on:
+      - s3
+      - aws-cli-make-bucket
+      - aws-cli-copy-file
+
+
 
