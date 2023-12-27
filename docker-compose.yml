@@ -11,14 +11,27 @@ services:
     volumes:
       - "${LOCALSTACK_VOLUME_DIR:-./volume}:/var/lib/localstack"
       - "/var/run/docker.sock:/var/run/docker.sock"
-  aws-cli:
-    container_name: "aws-cli"
+  aws-cli-make-bucket:
+    container_name: "aws-cli-make-bucket"
     image: amazon/aws-cli:latest
     environment:
       - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
       - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
       - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
-    command: s3 mb s3://edwin-lake-house
+    command: --endpoint-url=http://s3-localstack:4566 s3 mb s3://edwin-lake-house
     depends_on:
       - s3
+  aws-cli-copy-file:
+    container_name: "aws-cli-copy-file"
+    image: amazon/aws-cli:latest
+    environment:
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_DEFAULT_REGION=${AWS_DEFAULT_REGION}
+    command: --endpoint-url=http://s3-localstack:4566 s3 cp /customer/landing/customer-1691348231425.json s3://edwin-lake-house/customer/landing/
+    volumes:
+      - "./customer:/customer:rw"
+    depends_on:
+      - s3
+      - aws-cli-make-bucket
 
