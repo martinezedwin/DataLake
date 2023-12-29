@@ -29,27 +29,28 @@ CustomerLanding_node1685352206564 = glueContext.create_dynamic_frame.from_catalo
 )
 
 # Script generated for node SQL Query
-SqlQuery2272 = """
+SqlQuery2446 = """
 select * from myDataSource where shareWithResearchAsOfDate > 0
-
 """
 SQLQuery_node1703800950572 = sparkSqlQuery(
     glueContext,
-    query=SqlQuery2272,
+    query=SqlQuery2446,
     mapping={"myDataSource": CustomerLanding_node1685352206564},
     transformation_ctx="SQLQuery_node1703800950572",
 )
 
 # Script generated for node CostumerTrusted
-CostumerTrusted_node1703800980227 = glueContext.write_dynamic_frame.from_options(
-    frame=SQLQuery_node1703800950572,
+CostumerTrusted_node1703800980227 = glueContext.getSink(
+    path="s3://edwin-lake-house/customer/trusted/",
     connection_type="s3",
-    format="json",
-    connection_options={
-        "path": "s3://edwin-lake-house/customer/trusted/",
-        "partitionKeys": [],
-    },
+    updateBehavior="UPDATE_IN_DATABASE",
+    partitionKeys=["registrationDate"],
+    enableUpdateCatalog=True,
     transformation_ctx="CostumerTrusted_node1703800980227",
 )
-
+CostumerTrusted_node1703800980227.setCatalogInfo(
+    catalogDatabase="edwin", catalogTableName="customer_trusted2"
+)
+CostumerTrusted_node1703800980227.setFormat("json")
+CostumerTrusted_node1703800980227.writeFrame(SQLQuery_node1703800950572)
 job.commit()
